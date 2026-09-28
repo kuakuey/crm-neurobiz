@@ -12,6 +12,8 @@ class Activity extends Model
 
     protected $fillable = [
         'person_id',
+        'channel_id',
+        'external_ref',
         'deal_id',
         'user_id',
         'type',
@@ -36,6 +38,24 @@ class Activity extends Model
     public function person(): BelongsTo
     {
         return $this->belongsTo(Person::class);
+    }
+
+    public function channel(): BelongsTo
+    {
+        return $this->belongsTo(Channel::class);
+    }
+
+    public function isOpenInboundWhatsapp(): bool
+    {
+        if ($this->is_done) {
+            return false;
+        }
+
+        if ($this->relationLoaded('channel')) {
+            return $this->channel?->name === 'WhatsApp';
+        }
+
+        return $this->channel()->where('name', 'WhatsApp')->exists();
     }
 
     public function deal(): BelongsTo

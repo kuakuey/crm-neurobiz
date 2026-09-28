@@ -26,6 +26,7 @@ class AuthenticatedPagesTest extends TestCase
         $this->get('/activities')->assertOk()->assertSee('Pendientes');
         $this->get('/reports')->assertOk()->assertSee('B2B abiertos');
         $this->get('/settings/integrations')->assertOk()->assertSee('Chatwoot');
+        $this->get('/settings/users')->assertOk()->assertSee('Nuevo usuario');
         $this->get('/embed/chatwoot')->assertOk()->assertSee('Ficha CRM');
     }
 }

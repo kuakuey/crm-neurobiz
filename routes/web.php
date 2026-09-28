@@ -15,6 +15,7 @@ use App\Livewire\People\Index as PeopleIndex;
 use App\Livewire\People\Show as PersonShow;
 use App\Livewire\Reports\Direction;
 use App\Livewire\Settings\Integrations;
+use App\Livewire\Settings\Users as SettingsUsers;
 use App\Http\Controllers\Webhooks\ChatwootWebhookController;
 use App\Http\Controllers\Webhooks\DiagnosticWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +44,7 @@ Route::get('/embed/chatwoot', ChatwootPanel::class)->name('embed.chatwoot');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
+    Route::get('/contactos', PeopleIndex::class)->name('contactos.index');
     Route::get('/people', PeopleIndex::class)->name('people.index');
     Route::get('/people/create', PersonForm::class)->name('people.create');
     Route::get('/people/{person}/edit', PersonForm::class)->name('people.edit');
@@ -59,5 +61,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/activities', ActivitiesIndex::class)->name('activities.index');
     Route::get('/reports', Direction::class)->name('reports.index');
+    Route::get('/settings/users', SettingsUsers::class)->name('settings.users');
     Route::get('/settings/integrations', Integrations::class)->name('settings.integrations');
 });

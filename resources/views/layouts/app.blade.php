@@ -21,7 +21,7 @@
                 @php
                     $links = [
                         ['dashboard', 'Inicio', 'M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10'],
-                        ['people.index', 'Personas', 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
+                        ['contactos.index', 'Contactos', 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
                         ['organizations.index', 'Empresas', 'M3 21h18M9 8h6m-9 4h12M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16'],
                         ['deals.index', 'Pipeline', 'M3 7h6v10H3zM10 4h6v13h-6zM17 10h4v7h-4z'],
                         ['activities.index', 'Actividades', 'M8 7V3m8 4V3M3 11h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z'],
@@ -29,14 +29,25 @@
                     ];
                 @endphp
                 @foreach ($links as [$route, $label])
+                    @php
+                        $active = $route === 'contactos.index'
+                            ? request()->routeIs('contactos.*', 'people.*')
+                            : request()->routeIs(Str::before($route, '.').'.*') || request()->routeIs($route);
+                    @endphp
                     <a href="{{ route($route) }}" wire:navigate
-                       class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs(Str::before($route, '.').'.*') || request()->routeIs($route) ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                       class="block rounded-lg px-3 py-2 text-sm {{ $active ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                         {{ $label }}
                     </a>
                 @endforeach
+                @if(auth()->user()?->isAdmin())
+                    <a href="{{ route('settings.users') }}" wire:navigate
+                       class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.users') ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                        Usuarios
+                    </a>
+                @endif
                 @if(auth()->user()?->canManageSettings())
                     <a href="{{ route('settings.integrations') }}" wire:navigate
-                       class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.*') ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
+                       class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.integrations') ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                         Integraciones
                     </a>
                 @endif

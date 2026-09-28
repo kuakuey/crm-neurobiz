@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->role?->canManageSettings() ?? false;
     }
+
+    public function canViewUnassignedLeads(): bool
+    {
+        return in_array($this->role, [Role::Direccion, Role::Admin], true);
+    }
 }

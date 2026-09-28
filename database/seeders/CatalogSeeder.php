@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Channel;
+use App\Models\LeadSource;
 use App\Models\Offering;
 use App\Models\Pipeline;
 use App\Models\Stage;
@@ -11,6 +13,11 @@ class CatalogSeeder extends Seeder
 {
     public function run(): void
     {
+        foreach (['WhatsApp', 'Instagram', 'Facebook', 'Email'] as $name) {
+            LeadSource::query()->updateOrCreate(['name' => $name]);
+            Channel::query()->updateOrCreate(['name' => $name]);
+        }
+
         $pipelines = [
             'neurobusiness-b2b' => [
                 'name' => 'NeuroBusiness B2B',

@@ -28,7 +28,7 @@ npm install && npm run build
 php artisan storage:link
 ```
 
-Usuarios semilla: `admin@neurobiz.local` / `comercial@neurobiz.local`, contraseña `password`.
+Usuarios semilla: `admin@neurobiz.local`, `comercial@neurobiz.local`, `direccion@neurobiz.local`, contraseña `password`.
 
 ### VirtualHost
 
@@ -48,6 +48,7 @@ php artisan schedule:work
 | Superficie | Ruta |
 |---|---|
 | CRM | `/dashboard` |
+| Contactos | `/contactos` |
 | Dashboard App Chatwoot | `/embed/chatwoot` |
 | Webhook Chatwoot | `POST /webhooks/chatwoot` |
 | Diagnóstico gratuito | `POST /webhooks/diagnostico` |
@@ -63,4 +64,4 @@ Túnel local (ngrok / Cloudflare) hacia Apache: Chatwoot no puede pegarle a `loc
 
 Pipelines semilla: NeuroBusiness B2B, Programas B2C, Workshops. Ofertas: diagnóstico gratuito, alto impacto, sprint, mentoring retainer, certificación, workshop.
 
-El teléfono se normaliza a E.164 (`0980…` → `+593980…`).
+El teléfono se normaliza a E.164 (`0980…` → `+593980…`). La ingesta de WhatsApp que dispara n8n está en `POST /api/v1/whatsapp/messages`; el detalle del esquema está en [docs/auditoria-ingesta-whatsapp.md](docs/auditoria-ingesta-whatsapp.md).

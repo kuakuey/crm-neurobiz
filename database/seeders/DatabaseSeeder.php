@@ -33,6 +33,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        User::query()->updateOrCreate(
+            ['email' => 'direccion@neurobiz.local'],
+            [
+                'name' => 'Dirección comercial',
+                'password' => Hash::make('password'),
+                'role' => Role::Direccion,
+                'email_verified_at' => now(),
+            ]
+        );
+
         $this->call(CatalogSeeder::class);
         $admin->refresh();
     }

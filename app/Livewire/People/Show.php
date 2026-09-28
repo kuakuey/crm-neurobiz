@@ -4,6 +4,7 @@ namespace App\Livewire\People;
 
 use App\Models\Activity;
 use App\Models\Person;
+use App\Models\User;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -20,9 +21,14 @@ class Show extends Component
 
     public ?string $taskDue = null;
 
+    public ?string $assigneeId = null;
+
+    public ?string $assignError = null;
+
     public function mount(Person $person): void
     {
-        $this->person = $person->load(['owner', 'organizations', 'deals.stage', 'deals.offering', 'activities.user']);
+        $this->person = $person;
+        $this->reload();
     }
 
     public function addActivity(): void
@@ -46,12 +52,47 @@ class Show extends Component
 
         $this->taskTitle = '';
         $this->taskDue = null;
-        $this->person->refresh()->load(['activities.user', 'deals.stage']);
+        $this->reload();
         session()->flash('status', 'Actividad registrada.');
+    }
+
+    public function assignOwner(): void
+    {
+        abort_unless(auth()->user()?->canViewUnassignedLeads(), 403);
+
+        $this->assignError = null;
+        if (! $this->assigneeId || ! User::query()->whereKey($this->assigneeId)->exists()) {
+            $this->assignError = 'Elige un gestor.';
+
+            return;
+        }
+
+        $this->person->owner_id = (int) $this->assigneeId;
+        $this->person->save();
+        $this->reload();
+        session()->flash('status', 'Gestor asignado.');
     }
 
     public function render()
     {
-        return view('livewire.people.show');
+        $canAssign = (bool) auth()->user()?->canViewUnassignedLeads();
+
+        return view('livewire.people.show', [
+            'canAssign' => $canAssign,
+            'users' => $canAssign ? User::query()->orderBy('name')->get(['id', 'name']) : collect(),
+        ]);
+    }
+
+    private function reload(): void
+    {
+        $this->person->refresh()->load([
+            'owner',
+            'leadSource',
+            'organizations',
+            'deals.stage',
+            'deals.offering',
+            'activities.user',
+            'activities.channel',
+        ]);
     }
 }

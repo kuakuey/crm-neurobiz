@@ -31,7 +31,15 @@ class PersonMatcher
         }
 
         if ($phone) {
-            $person = Person::query()->where('phone_e164', $phone)->first();
+            $normalized = PhoneNormalizer::normalized($phone);
+            $person = Person::query()
+                ->where(function ($query) use ($phone, $normalized) {
+                    $query->where('phone_e164', $phone);
+                    if ($normalized) {
+                        $query->orWhere('phone_normalized', $normalized);
+                    }
+                })
+                ->first();
             if ($person) {
                 return $person;
             }

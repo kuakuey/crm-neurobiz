@@ -40,4 +40,14 @@ class PhoneNormalizer
 
         return '+'.$digits;
     }
+
+    public static function normalized(?string $raw): ?string
+    {
+        $e164 = self::toE164($raw);
+        if ($e164 === null) {
+            return null;
+        }
+
+        return ltrim($e164, '+');
+    }
 }

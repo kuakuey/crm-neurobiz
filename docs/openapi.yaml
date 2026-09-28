@@ -93,6 +93,61 @@ paths:
       summary: Alias de activities (type=note)
       responses:
         '201': { description: Creada }
+  /contacts/find-duplicates:
+    post:
+      summary: Equivale a find_duplicate_contacts(phone, email, first_name, company_id)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                email: { type: string }
+                first_name: { type: string }
+                company_id: { type: integer }
+      responses:
+        '200': { description: Coincidencias }
+        '401': { description: Sin token }
+  /channels:
+    get:
+      summary: Catálogo de canales
+      parameters:
+        - in: query
+          name: name
+          schema: { type: string, example: WhatsApp }
+      responses:
+        '200': { description: Canales }
+        '401': { description: Sin token }
+  /lead-sources:
+    get:
+      summary: Catálogo de fuentes
+      responses:
+        '200': { description: Fuentes }
+        '401': { description: Sin token }
+  /whatsapp/messages:
+    post:
+      summary: Ingesta idempotente de un mensaje entrante de WhatsApp
+      description: Deduplica por teléfono normalizado, crea el contacto sin gestor si no existe y registra la actividad. El mismo external_ref no duplica la actividad.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string, example: "+593 99 123 4567" }
+                email: { type: string }
+                first_name: { type: string }
+                company_id: { type: integer }
+                result: { type: string }
+                message: { type: string }
+                external_ref: { type: string, example: "chatwoot:msg:123" }
+      responses:
+        '201': { description: Actividad creada }
+        '200': { description: Reintento idempotente }
+        '401': { description: Sin token }
 components:
   securitySchemes:
     bearerAuth:
