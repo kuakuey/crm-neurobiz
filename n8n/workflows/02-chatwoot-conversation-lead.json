@@ -1,0 +1,58 @@
+{
+  "name": "CRM Neurobiz · Conversación Chatwoot → lead",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatwoot-conversation",
+        "options": {}
+      },
+      "id": "wh",
+      "name": "Chatwoot o CRM webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CRM_BASE_URL }}/api/v1/people",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"{{ $json.body.contact.name || $json.data.person.name }}\",\n  \"phone\": \"{{ $json.body.contact.phone_number || $json.data.person.phone_e164 }}\",\n  \"email\": \"{{ $json.body.contact.email || $json.data.person.email }}\",\n  \"source\": \"chatwoot\",\n  \"chatwoot_contact_id\": \"{{ $json.body.contact.id }}\"\n}",
+        "options": {}
+      },
+      "id": "upsert",
+      "name": "Upsert persona CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CRM_BASE_URL }}/api/v1/deals",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"person_id\": {{ $json.data.id }},\n  \"pipeline\": \"neurobusiness-b2b\",\n  \"stage\": \"lead\",\n  \"title\": \"Lead {{ $json.data.name }}\",\n  \"source\": \"chatwoot\"\n}",
+        "options": {}
+      },
+      "id": "deal",
+      "name": "Crear deal Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [740, 300]
+    }
+  ],
+  "connections": {
+    "Chatwoot o CRM webhook": { "main": [[{ "node": "Upsert persona CRM", "type": "main", "index": 0 }]] },
+    "Upsert persona CRM": { "main": [[{ "node": "Crear deal Lead", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

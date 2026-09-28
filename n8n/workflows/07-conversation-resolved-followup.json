@@ -1,0 +1,74 @@
+{
+  "name": "CRM Neurobiz · Conversación resuelta + deal abierto",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatwoot-resolved",
+        "options": {}
+      },
+      "id": "wh",
+      "name": "Chatwoot status",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.body.event }}", "rightValue": "conversation_status_changed", "operator": { "type": "string", "operation": "equals" } },
+            { "leftValue": "={{ $json.body.conversation.status || $json.body.status }}", "rightValue": "resolved", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if",
+      "name": "¿Resuelta?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CRM_BASE_URL }}/api/v1/people",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"{{ $json.body.contact.name }}\",\n  \"phone\": \"{{ $json.body.contact.phone_number }}\",\n  \"chatwoot_contact_id\": \"{{ $json.body.contact.id }}\",\n  \"source\": \"chatwoot\"\n}"
+      },
+      "id": "person",
+      "name": "Resolver persona",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [740, 220]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CRM_BASE_URL }}/api/v1/activities",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"person_id\": {{ $json.data.id }},\n  \"type\": \"task\",\n  \"title\": \"Follow-up comercial post conversación resuelta\",\n  \"due_at\": \"{{ $now.plus({ hours: 4 }).toISO() }}\"\n}"
+      },
+      "id": "task",
+      "name": "Tarea follow-up",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [980, 220]
+    }
+  ],
+  "connections": {
+    "Chatwoot status": { "main": [[{ "node": "¿Resuelta?", "type": "main", "index": 0 }]] },
+    "¿Resuelta?": { "main": [[{ "node": "Resolver persona", "type": "main", "index": 0 }]] },
+    "Resolver persona": { "main": [[{ "node": "Tarea follow-up", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

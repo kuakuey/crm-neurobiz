@@ -1,0 +1,65 @@
+{
+  "name": "CRM Neurobiz · Deal estancado 7 días",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-stale",
+        "options": {}
+      },
+      "id": "wh",
+      "name": "Webhook CRM",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.body.type }}", "rightValue": "deal.stage_changed", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if",
+      "name": "Cambio de etapa",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "amount": 7,
+        "unit": "days"
+      },
+      "id": "wait",
+      "name": "Esperar 7 días",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [700, 220]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.CRM_BASE_URL }}/api/v1/people/{{ $json.body.data.deal.person_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "check",
+      "name": "Verificar deal abierto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [920, 220]
+    }
+  ],
+  "connections": {
+    "Webhook CRM": { "main": [[{ "node": "Cambio de etapa", "type": "main", "index": 0 }]] },
+    "Cambio de etapa": { "main": [[{ "node": "Esperar 7 días", "type": "main", "index": 0 }]] },
+    "Esperar 7 días": { "main": [[{ "node": "Verificar deal abierto", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

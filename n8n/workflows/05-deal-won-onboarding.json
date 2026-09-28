@@ -1,0 +1,56 @@
+{
+  "name": "CRM Neurobiz · Deal ganado onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-won",
+        "options": {}
+      },
+      "id": "wh",
+      "name": "Evento CRM",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "id": "c1", "leftValue": "={{ $json.body.type }}", "rightValue": "deal.won", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if",
+      "name": "¿Ganado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CRM_BASE_URL }}/api/v1/activities",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"deal_id\": {{ $json.body.data.deal.id }},\n  \"person_id\": {{ $json.body.data.deal.person_id }},\n  \"type\": \"task\",\n  \"title\": \"Onboarding: kickoff + KPIs + canal de seguimiento\",\n  \"due_at\": \"{{ $now.plus({ days: 1 }).toISO() }}\"\n}"
+      },
+      "id": "task",
+      "name": "Checklist onboarding",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [700, 220]
+    }
+  ],
+  "connections": {
+    "Evento CRM": { "main": [[{ "node": "¿Ganado?", "type": "main", "index": 0 }]] },
+    "¿Ganado?": { "main": [[{ "node": "Checklist onboarding", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

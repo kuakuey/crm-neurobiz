@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: CRM Neurobiz API
+  version: 1.0.0
+  description: API para n8n. Autenticación Bearer (Sanctum).
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+paths:
+  /people:
+    post:
+      summary: Upsert de persona por teléfono o email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                phone: { type: string }
+                email: { type: string }
+                source: { type: string }
+                chatwoot_contact_id: { type: string }
+      responses:
+        '201': { description: Creada o actualizada }
+  /people/{id}:
+    get:
+      summary: Contexto de persona
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Ficha }
+  /deals:
+    post:
+      summary: Crear deal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                person_id: { type: integer }
+                pipeline: { type: string, example: neurobusiness-b2b }
+                stage: { type: string, example: lead }
+                offering: { type: string }
+                title: { type: string }
+                source: { type: string }
+      responses:
+        '201': { description: Creado }
+  /deals/{id}/stage:
+    patch:
+      summary: Cambiar etapa
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stage]
+              properties:
+                stage: { description: ID numérico o slug }
+      responses:
+        '200': { description: Actualizado }
+  /activities:
+    post:
+      summary: Crear actividad o nota
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                person_id: { type: integer }
+                deal_id: { type: integer }
+                type: { type: string, enum: [call, whatsapp, meeting, task, note] }
+                title: { type: string }
+                body: { type: string }
+                due_at: { type: string, format: date-time }
+      responses:
+        '201': { description: Creada }
+  /notes:
+    post:
+      summary: Alias de activities (type=note)
+      responses:
+        '201': { description: Creada }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

@@ -1,0 +1,55 @@
+{
+  "name": "CRM Neurobiz · Receptor de eventos",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-neurobiz",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-crm",
+      "name": "Webhook CRM",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 300],
+      "webhookId": "crm-neurobiz"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\nconst type = body.type || $json.headers?.['x-crm-event'];\nreturn [{ json: { type, event_id: body.event_id, data: body.data || body } }];"
+      },
+      "id": "normalize",
+      "name": "Normalizar evento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{ $json.type }}", "rightValue": "deal.stage_changed", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "stage_changed" },
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{ $json.type }}", "rightValue": "deal.won", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "won" },
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{ $json.type }}", "rightValue": "activity.overdue", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "overdue" },
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" }, "conditions": [{ "leftValue": "={{ $json.type }}", "rightValue": "conversation.linked", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and" }, "renameOutput": true, "outputKey": "linked" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch",
+      "name": "Switch tipo",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [700, 300]
+    }
+  ],
+  "connections": {
+    "Webhook CRM": { "main": [[{ "node": "Normalizar evento", "type": "main", "index": 0 }]] },
+    "Normalizar evento": { "main": [[{ "node": "Switch tipo", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": true },
+  "tags": []
+}

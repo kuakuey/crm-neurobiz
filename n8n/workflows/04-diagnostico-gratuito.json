@@ -1,0 +1,47 @@
+{
+  "name": "CRM Neurobiz · Diagnóstico gratuito completado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "diagnostico-gratuito",
+        "options": {}
+      },
+      "id": "wh",
+      "name": "Resultado diagnóstico",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CRM_BASE_URL }}/webhooks/diagnostico",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-CRM-Signature",
+              "value": "={{ $helpers.crypto.createHmac('sha256', $env.CRM_HMAC_SECRET).update(JSON.stringify($json.body || $json)).digest('hex') }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body || $json) }}",
+        "options": {}
+      },
+      "id": "crm",
+      "name": "Ingestar en CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [520, 300]
+    }
+  ],
+  "connections": {
+    "Resultado diagnóstico": { "main": [[{ "node": "Ingestar en CRM", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

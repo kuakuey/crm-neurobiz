@@ -1,0 +1,51 @@
+{
+  "name": "CRM Neurobiz · Sin respuesta 24h",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 1 }] }
+      },
+      "id": "cron",
+      "name": "Cada hora",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.CRM_BASE_URL }}/api/v1/webhooks/inbound",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "note",
+      "name": "Placeholder consulta CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.CRM_BASE_URL }}/api/v1/activities",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"title\": \"Recordatorio: sin respuesta 24h\",\n  \"type\": \"task\",\n  \"body\": \"El owner debe retomar el hilo. Completar en Chatwoot con nota privada.\"\n}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "task",
+      "name": "Crear recordatorio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [760, 300]
+    }
+  ],
+  "connections": {
+    "Cada hora": { "main": [[{ "node": "Placeholder consulta CRM", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "tags": []
+}
