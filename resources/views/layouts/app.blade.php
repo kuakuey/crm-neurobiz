@@ -10,14 +10,34 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased">
+<body
+    class="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased"
+    x-data="{ menuOpen: false }"
+    @keydown.escape.window="menuOpen = false"
+    :class="menuOpen ? 'overflow-hidden xl:overflow-visible' : ''"
+>
+    <div
+        x-show="menuOpen"
+        x-cloak
+        x-transition.opacity
+        class="fixed inset-0 z-40 bg-slate-900/50 xl:hidden"
+        @click="menuOpen = false"
+        aria-hidden="true"
+    ></div>
     <div class="flex min-h-screen">
-        <aside class="hidden w-64 shrink-0 bg-navy text-white lg:flex lg:flex-col">
-            <div class="px-6 py-6">
-                <div class="text-xs uppercase tracking-[0.2em] text-teal-300">Neurobiz</div>
-                <div class="mt-1 text-lg font-semibold">CRM comercial</div>
+        <aside id="app-sidebar" class="nav-drawer" :class="{ 'is-open': menuOpen }">
+            <div class="flex items-start justify-between gap-3 px-6 py-6">
+                <div>
+                    <div class="text-xs uppercase tracking-[0.2em] text-teal-300">Neurobiz</div>
+                    <div class="mt-1 text-lg font-semibold">CRM comercial</div>
+                </div>
+                <button type="button" class="rounded-lg p-2 text-slate-300 hover:bg-white/10 hover:text-white xl:hidden" @click="menuOpen = false" aria-label="Cerrar menú">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
+                    </svg>
+                </button>
             </div>
-            <nav class="flex-1 space-y-1 px-3">
+            <nav class="flex-1 space-y-1 overflow-y-auto px-3">
                 @php
                     $links = [
                         ['dashboard', 'Inicio', 'M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10'],
@@ -34,19 +54,19 @@
                             ? request()->routeIs('contactos.*', 'people.*')
                             : request()->routeIs(Str::before($route, '.').'.*') || request()->routeIs($route);
                     @endphp
-                    <a href="{{ route($route) }}" wire:navigate
+                    <a href="{{ route($route) }}" wire:navigate @click="menuOpen = false"
                        class="block rounded-lg px-3 py-2 text-sm {{ $active ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                         {{ $label }}
                     </a>
                 @endforeach
                 @if(auth()->user()?->isAdmin())
-                    <a href="{{ route('settings.users') }}" wire:navigate
+                    <a href="{{ route('settings.users') }}" wire:navigate @click="menuOpen = false"
                        class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.users') ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                         Usuarios
                     </a>
                 @endif
                 @if(auth()->user()?->canManageSettings())
-                    <a href="{{ route('settings.integrations') }}" wire:navigate
+                    <a href="{{ route('settings.integrations') }}" wire:navigate @click="menuOpen = false"
                        class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('settings.integrations') ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
                         Integraciones
                     </a>
@@ -62,11 +82,21 @@
             </div>
         </aside>
         <div class="flex min-w-0 flex-1 flex-col">
-            <header class="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:px-8">
-                <div>
-                    <h1 class="text-lg font-semibold text-navy">{{ $title ?? 'CRM Neurobiz' }}</h1>
-                </div>
-                <a href="{{ route('deals.create') }}" wire:navigate class="rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white hover:bg-teal-700">Nuevo deal</a>
+            <header class="flex items-center gap-2 border-b border-slate-200 bg-white px-3 py-3 sm:gap-3 sm:px-4 xl:px-8">
+                <button
+                    type="button"
+                    class="rounded-lg p-2 text-navy hover:bg-slate-100 xl:hidden"
+                    @click="menuOpen = !menuOpen"
+                    :aria-expanded="menuOpen ? 'true' : 'false'"
+                    aria-controls="app-sidebar"
+                    aria-label="Menú"
+                >
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/>
+                    </svg>
+                </button>
+                <h1 class="min-w-0 flex-1 truncate text-lg font-semibold text-navy">{{ $title ?? 'CRM Neurobiz' }}</h1>
+                <a href="{{ route('deals.create') }}" wire:navigate class="shrink-0 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white hover:bg-teal-700">Nuevo deal</a>
             </header>
             <main class="flex-1 px-4 py-6 lg:px-8">
                 @if (session('status'))

@@ -17,7 +17,7 @@ class AuthenticatedPagesTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->get('/dashboard')->assertOk()->assertSee('Leads esta semana');
+        $this->get('/dashboard')->assertOk()->assertSee('Leads esta semana')->assertSee('aria-label="Menú"', false)->assertSee('Cerrar menú');
         $this->get('/people')->assertOk()->assertSee('Nueva persona');
         $this->get('/people/create')->assertOk()->assertSee('Nombre');
         $this->get('/organizations')->assertOk()->assertSee('Nueva empresa');

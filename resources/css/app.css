@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+    display: none !important;
+}
+
+@layer components {
+    .nav-drawer {
+        @apply fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] -translate-x-full flex-col bg-navy text-white shadow-xl transition-transform duration-200 ease-out;
+    }
+
+    .nav-drawer.is-open {
+        @apply translate-x-0;
+    }
+
+    @media (min-width: 1280px) {
+        .nav-drawer,
+        .nav-drawer.is-open {
+            @apply static z-auto w-64 max-w-none translate-x-0 shadow-none;
+        }
+    }
+}
+
 @layer components {
     input[type='text'],
     input[type='email'],
